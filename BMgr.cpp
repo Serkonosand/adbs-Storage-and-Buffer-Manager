@@ -1,4 +1,8 @@
 #include "BMgr.h"
+#include <string.h>
+#include <iostream>
+
+using namespace std;
 
 int hit = 0;
 int miss = 0;
@@ -32,7 +36,7 @@ int BMgr::newBCB(int page_id)
         frame_id = SelectVictim();
         RemoveLRUEle(frame_id);
     }
-    bcb->frame_id = page_id;
+    bcb->page_id = page_id;
     bool sign = false;
     for (int i = 0; i < DEFBUFSIZE; i++)
     {
@@ -104,8 +108,8 @@ int BMgr::FixPage(int page_id, int prot)
 NewPage BMgr::FixNewPage()
 {
     NewPage np;
-    int i = 0;
-    for (int i = 0; i < storage.GetNumPages(); i++)
+    int i;
+    for (i = 0; i < storage.GetNumPages(); i++)
     {
         if(storage.GetUse(i) == 0)
             break;
@@ -129,10 +133,9 @@ int BMgr::UnfixPage(int page_id)
     }
     if (bcb != NULL)
     {
+        bcb->count = bcb->count - 1;
         if (bcb->count == 0)
             bcb->latch = 0;
-        else   
-            bcb->count = bcb->count - 1;
     }
     return bcb->frame_id;
 }
@@ -159,18 +162,18 @@ int BMgr::SelectVictim()
     {
         if (it == lrulist.begin())
             break;
-        it-- ;
+        it--;
         bcb = ptof[Hash(ftop[*it])];
         while (bcb->frame_id != *it && bcb->next != NULL) 
         {
             bcb = bcb->next;
         }
-        if (bcb->frame_id == *it && bcb->latch == 0)
+        if (bcb->frame_id == *it && bcb->count <= 0)
         {
             break;
         }
     }
-    if (bcb->frame_id != *it || bcb->latch != 0)
+    if (bcb->frame_id != *it || bcb->count > 0)
     {
         printf("ERROR/BMgr.cpp-175:ALL FRAME ARE USING!\n");
         return -1;
@@ -256,5 +259,5 @@ void BMgr::WriteDirtys()
 
 void BMgr::PrintFrame(int frame_id)
 {
-    printf("frame_id: %d \t value: %s \n ", frame_id, (*(buffer[frame_id])->field));
+    printf("frame_id: %d \t value: %s \n ", frame_id, (*buffer[frame_id]).field);
 }

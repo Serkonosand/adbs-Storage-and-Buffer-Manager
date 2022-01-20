@@ -14,14 +14,16 @@ int main()
     FILE *f = fopen("data.dbf", "w");
     fclose(f);
     BMgr BufManager, Init;
-    for (int i = 0; i < DEFBUFSIZE; i++)
+    for (int i = 0; i < MAXPAGES; i++)
     {
+        cout<<"breakpoint: "<<i<<endl;
         NewPage np;
-        np = BufManager.FixNewPage();
-        BufManager.UnfixPage(np.page_id);
+        np = Init.FixNewPage();
+        Init.UnfixPage(np.page_id);
     }
     Init.storage.CloseFile();
     cout << "hit:" << hit << "  miss:" << miss << endl;
+    cout<<"begin test"<<endl;
     hit = 0;
     miss = 0;
     r = 0;
